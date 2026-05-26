@@ -19,7 +19,10 @@ function Layout({ children }) {
       <header className="app-header">
         <h1>Figuritas — Intercambios</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{user.username}</span>
+          <span style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>
+            {user.username}
+            {user.groupName ? ` · Estás en: ${user.groupName}` : ''}
+          </span>
           <button type="button" className="btn btn-ghost" onClick={handleLogout}>
             Salir
           </button>
@@ -29,8 +32,8 @@ function Layout({ children }) {
         <NavLink to="/" end>
           Mi álbum
         </NavLink>
-        <NavLink to="/intercambiar">Intercambiar</NavLink>
-        {user.isAdmin && <NavLink to="/admin">Admin</NavLink>}
+        {user.canTrade && <NavLink to="/intercambiar">Intercambiar</NavLink>}
+        {['super_admin', 'group_admin'].includes(user.role) && <NavLink to="/admin">Admin</NavLink>}
       </nav>
       {children}
     </div>

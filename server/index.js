@@ -14,6 +14,7 @@ import {
   createUser,
   countUsers,
   updateUserPassword,
+  ROLE_SUPER_ADMIN,
 } from './db.js';
 import {
   PORT,
@@ -55,7 +56,12 @@ async function ensureAdminFromEnv() {
 
   const password = adminPassword || 'admin123';
   const hash = await bcrypt.hash(password, 10);
-  await createUser(adminUsername, hash, true);
+  await createUser({
+    username: adminUsername,
+    passwordHash: hash,
+    role: ROLE_SUPER_ADMIN,
+    groupId: null,
+  });
   console.log(`Admin inicial creado: ${adminUsername}`);
 }
 

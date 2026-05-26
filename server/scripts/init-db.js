@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { initDb, getUserByUsername, createUser } from '../db.js';
+import { initDb, getUserByUsername, createUser, ROLE_SUPER_ADMIN } from '../db.js';
 import { mkdirSync, existsSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
@@ -18,7 +18,12 @@ if (existing) {
   console.log(`Usuario admin "${adminUser}" ya existe.`);
 } else {
   const hash = await bcrypt.hash(adminPass, 10);
-  await createUser(adminUser, hash, true);
+  await createUser({
+    username: adminUser,
+    passwordHash: hash,
+    role: ROLE_SUPER_ADMIN,
+    groupId: null,
+  });
   console.log(`Admin creado: usuario="${adminUser}" contraseña="${adminPass}"`);
   console.log('Cambiá la contraseña después del primer login.');
 }

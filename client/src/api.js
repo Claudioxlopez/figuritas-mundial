@@ -20,6 +20,10 @@ export const api = {
   logout: () => request('/logout', { method: 'POST' }),
   me: () => request('/me'),
   users: () => request('/users'),
+  adminUsers: () => request('/admin/users'),
+  groups: () => request('/admin/groups'),
+  createGroup: (name) => request('/admin/groups', { method: 'POST', body: JSON.stringify({ name }) }),
+  deleteGroup: (id) => request(`/admin/groups/${id}`, { method: 'DELETE' }),
   catalog: () => request('/catalog'),
   collection: () => request('/collection'),
   togglePasted: (stickerId) =>
@@ -33,10 +37,15 @@ export const api = {
       body: JSON.stringify({ stickerId, delta }),
     }),
   trade: (otherUserId) => request(`/trade/${otherUserId}`),
-  createUser: (username, password, isAdmin) =>
+  createUser: (payload) =>
     request('/admin/users', {
       method: 'POST',
-      body: JSON.stringify({ username, password, isAdmin }),
+      body: JSON.stringify(payload),
+    }),
+  updateUserRole: (id, role, groupId) =>
+    request(`/admin/users/${id}/role`, {
+      method: 'PUT',
+      body: JSON.stringify({ role, groupId }),
     }),
   deleteUser: (id) => request(`/admin/users/${id}`, { method: 'DELETE' }),
   resetPassword: (id, password) =>

@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { api } from '../api.js';
 import AlbumGrid from '../components/AlbumGrid.jsx';
 import { ALBUM_GROUPS_PLANILLA } from '../../../album-catalog.js';
+import { useAuth } from '../auth.jsx';
 
 export default function AlbumPage() {
+  const { user } = useAuth();
   const [data, setData] = useState(null);
   const [mode, setMode] = useState('pasted');
   const [error, setError] = useState('');
@@ -84,6 +87,10 @@ export default function AlbumPage() {
       setSavingId(null);
     }
   };
+
+  if (user?.role === 'super_admin') {
+    return <Navigate to="/admin" replace />;
+  }
 
   if (loading && !data) {
     return <p>Cargando álbum… (puede tardar unos segundos en el plan free)</p>;

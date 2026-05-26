@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
 
@@ -9,6 +10,10 @@ export default function TradePage() {
   const [match, setMatch] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  if (!user?.canTrade) {
+    return <Navigate to="/" replace />;
+  }
 
   useEffect(() => {
     api
@@ -37,8 +42,8 @@ export default function TradePage() {
       <div className="card">
         <h2>Intercambiar con…</h2>
         <p className="hint">
-          Elegí un usuario para ver qué figuritas de sus disponibles te sirven a vos (no las tenés
-          pegadas) y cuáles de las tuyas le sirven a esa persona.
+          Elegí un usuario de tu grupo ({user.groupName}) para ver qué figuritas de sus disponibles
+          te sirven a vos (no las tenés pegadas) y cuáles de las tuyas le sirven a esa persona.
         </p>
         <label htmlFor="other">Usuario</label>
         <select id="other" value={otherId} onChange={(e) => setOtherId(e.target.value)}>
