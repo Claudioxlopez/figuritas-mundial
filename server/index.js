@@ -1,12 +1,13 @@
 import express from 'express';
 import session from 'express-session';
 import cors from 'cors';
+import bcrypt from 'bcrypt';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import connectPgSimple from 'connect-pg-simple';
 import router from './routes.js';
-import { initDb, pgPool } from './db.js';
+import { initDb, pgPool, getUserByUsername, createUser } from './db.js';
 import {
   PORT,
   SESSION_SECRET,
@@ -22,6 +23,21 @@ if (!USE_POSTGRES && !existsSync(dataDir)) {
 }
 
 await initDb();
+
+async function ensureAdminFromEnv() {
+  const adminUsername = process.env.ADMIN_USERNAME?.trim();
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminUsername || !adminPassword) return;
+
+  const existing = await getUserByUsername(adminUsername);
+  if (existing) return;
+
+  const hash = await bcrypt.hash(adminPassword, 10);
+  await createUser(adminUsername, hash, true);
+  console.log(`Admin inicial creado: ${adminUsername}`);
+}
+
+await ensureAdminFromEnv();
 
 const app = express();
 
