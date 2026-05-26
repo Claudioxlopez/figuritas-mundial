@@ -157,6 +157,15 @@ export async function listUsers() {
   }));
 }
 
+export async function countUsers() {
+  if (USE_POSTGRES) {
+    const { rows } = await pgQuery('SELECT COUNT(*)::int AS count FROM users');
+    return rows[0].count;
+  }
+  const row = sqliteGet('SELECT COUNT(*) AS count FROM users');
+  return row.count;
+}
+
 export async function createUser(username, passwordHash, isAdmin = false) {
   if (USE_POSTGRES) {
     const { rows } = await pgQuery(

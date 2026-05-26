@@ -7,7 +7,14 @@ import { dirname, join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import connectPgSimple from 'connect-pg-simple';
 import router from './routes.js';
-import { initDb, pgPool, getUserByUsername, createUser } from './db.js';
+import {
+  initDb,
+  pgPool,
+  getUserByUsername,
+  createUser,
+  countUsers,
+  updateUserPassword,
+} from './db.js';
 import {
   PORT,
   SESSION_SECRET,
@@ -25,14 +32,29 @@ if (!USE_POSTGRES && !existsSync(dataDir)) {
 await initDb();
 
 async function ensureAdminFromEnv() {
-  const adminUsername = process.env.ADMIN_USERNAME?.trim();
+  const adminUsername = process.env.ADMIN_USERNAME?.trim() || 'admin';
   const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!adminUsername || !adminPassword) return;
+  const resetPassword = process.env.ADMIN_RESET_PASSWORD === 'true';
 
   const existing = await getUserByUsername(adminUsername);
+  const totalUsers = await countUsers();
+
+  if (existing && resetPassword && adminPassword) {
+    const hash = await bcrypt.hash(adminPassword, 10);
+    await updateUserPassword(existing.id, hash);
+    console.log(`Contraseña de admin actualizada: ${adminUsername}`);
+    return;
+  }
+
   if (existing) return;
 
-  const hash = await bcrypt.hash(adminPassword, 10);
+  if (!adminPassword && totalUsers > 0) {
+    console.warn('No hay ADMIN_PASSWORD en env y la base ya tiene usuarios.');
+    return;
+  }
+
+  const password = adminPassword || 'admin123';
+  const hash = await bcrypt.hash(password, 10);
   await createUser(adminUsername, hash, true);
   console.log(`Admin inicial creado: ${adminUsername}`);
 }
