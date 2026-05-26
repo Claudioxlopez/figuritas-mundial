@@ -466,12 +466,12 @@ export async function adjustAvailable(userId, stickerId, delta) {
 export async function getCollection(userId) {
   const [pasted, available] = await Promise.all([getPasted(userId), getAvailable(userId)]);
   const pastedSet = new Set(pasted);
-  const missing = ALL_STICKER_IDS.filter((id) => !pastedSet.has(id));
+  const missingCount = ALL_STICKER_IDS.length - pastedSet.size;
   const warnings = available
     .filter((a) => !pastedSet.has(a.stickerId))
     .map((a) => ({ stickerId: a.stickerId, quantity: a.quantity }));
 
-  return { pasted, available, missing, warnings };
+  return { pasted, available, missingCount, warnings };
 }
 
 export async function getTradeMatch(userId, otherUserId) {

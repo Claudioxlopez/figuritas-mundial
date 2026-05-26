@@ -9,12 +9,22 @@ export default function AlbumPage() {
   const [error, setError] = useState('');
   const [savingId, setSavingId] = useState(null);
   const [filter, setFilter] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const load = useCallback(() => {
+    setLoading(true);
+    setError('');
     api
       .collection()
-      .then(setData)
-      .catch((e) => setError(e.message));
+      .then((d) => {
+        setData(d);
+        setError('');
+      })
+      .catch((e) => {
+        setData(null);
+        setError(e.message || 'No se pudo cargar el álbum');
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -75,8 +85,19 @@ export default function AlbumPage() {
     }
   };
 
+  if (loading && !data) {
+    return <p>Cargando álbum… (puede tardar unos segundos en el plan free)</p>;
+  }
+
   if (!data) {
-    return <p>Cargando álbum…</p>;
+    return (
+      <div className="card">
+        <div className="alert alert-error">{error || 'No se pudo cargar el álbum'}</div>
+        <button type="button" className="btn" onClick={load}>
+          Reintentar
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -91,7 +112,7 @@ export default function AlbumPage() {
           <span>Total para intercambiar</span>
         </div>
         <div className="stat">
-          <strong>{data.missing.length}</strong>
+          <strong>{data.missingCount ?? 0}</strong>
           <span>Total faltantes</span>
         </div>
       </div>

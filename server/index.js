@@ -63,6 +63,11 @@ await ensureAdminFromEnv();
 
 const app = express();
 
+// Render (y otros proxies) necesitan esto para cookies secure en HTTPS
+if (IS_PROD) {
+  app.set('trust proxy', 1);
+}
+
 if (!IS_PROD) {
   app.use(
     cors({
